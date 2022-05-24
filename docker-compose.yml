@@ -1,0 +1,71 @@
+
+version: "3.7"
+services:
+
+#Laravel App
+  app:
+    build:
+      args:
+        user: hung
+        uid: 197609 
+      context: ./docker/app
+      dockerfile: Dockerfile
+    image: tranning
+    restart: unless-stopped
+    working_dir: /var/www/
+    volumes:
+      - ./:/var/www
+    networks:
+      - mynetwork
+    
+ #Nginx Service
+  nginx:
+    image: nginx:alpine
+    restart: unless-stopped
+    ports:
+      - 8000:80
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d/
+    networks:
+      - mynetwork
+  #Mysl Service
+  db:
+    image: mysql:5.7
+    restart: unless-stopped
+    ports:
+      - 2550:3360
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_USER: ${DB_USERNAME}
+    networks:
+      - mynetwork
+  #PhpMyAdmin Service
+  phpmyadmin:
+    image: phpmyadmin
+    environment:
+      PMA_ARBITRARY: 1
+      PMA_HOST: ${DB_HOST}
+      PMA_USER: ${DB_USERNAME}
+      PMA_PASSWORD: ${DB_PASSWORD}
+      PMA_PORT: ${DB_PORT}
+    depends_on:
+      - db
+    ports:
+      - 8989:80
+    networks: 
+      - mynetwork
+  #Redis Service
+  redis:
+    image: redis:7.0.0-alpine
+    container_name: tranning_redis
+    ports:
+      - "6381:6379"
+    networks:
+      - mynetwork
+      
+networks:
+  mynetwork:
+    driver: bridge
