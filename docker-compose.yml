@@ -7,7 +7,7 @@ services:
     build:
       args:
         user: hung
-        uid: 197609 
+        uid: 1000 
       context: ./docker/app
       dockerfile: Dockerfile
     image: tranning

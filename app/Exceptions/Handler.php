@@ -4,6 +4,9 @@ namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
+use Illuminate\Validation\ValidationException;
+use App\Exceptions\Server\SystemException;
+use App\Facades\Response;
 
 class Handler extends ExceptionHandler
 {
@@ -34,8 +37,26 @@ class Handler extends ExceptionHandler
      */
     public function register()
     {
-        $this->reportable(function (Throwable $e) {
-            //
+        $this->renderable(function (SystemException $e) {
+            return Response::failure($e->getMessage(), [], $e->getCode(), $e->getCode());
+        });
+
+        $this->renderable(function (ValidationException $e) {
+            $errors = array_values($e->errors());
+            try {
+                $keys = array_keys($e->errors());
+                $optional = [
+                    'validation_key' => $keys[0] . '.' . strtolower(array_keys($e->validator->failed()[$keys[0]])[0]),
+                ];
+            } catch (\Exception $e) {
+                $optional = [];
+            }
+            return Response::failure(
+                $errors[0][0],
+                $optional,
+                422,
+                422
+            );
         });
     }
 }
