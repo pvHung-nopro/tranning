@@ -10,4 +10,6 @@ interface SendMailServiceInterface
     public function sendMail(array $data): ?ContextSendMail;
     public function history(int $id): array;
     public function postMailAllUsers(Collection $users,  ContextSendMail $contextSendMail);
+    public function checkMailServerDie(): bool;
+    public function sendToMail(int $id);
 }

@@ -6,6 +6,7 @@ use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
 use Illuminate\Validation\ValidationException;
 use App\Exceptions\Server\SystemException;
+use App\Exceptions\Client\ClientException;
 use App\Facades\Response;
 
 class Handler extends ExceptionHandler
@@ -38,6 +39,10 @@ class Handler extends ExceptionHandler
     public function register()
     {
         $this->renderable(function (SystemException $e) {
+            return Response::failure($e->getMessage(), [], $e->getCode(), $e->getCode());
+        });
+
+        $this->renderable(function (ClientException $e) {
             return Response::failure($e->getMessage(), [], $e->getCode(), $e->getCode());
         });
 

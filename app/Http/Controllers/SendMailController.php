@@ -38,6 +38,11 @@ class SendMailController extends Controller
         return Response::success($data);
     }
 
+    public function sendToMail(int $id)
+    {
+       $data = $this->sendMailService->sendToMail($id);
+    }
+
 
 
 

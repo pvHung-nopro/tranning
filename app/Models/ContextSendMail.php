@@ -13,5 +13,6 @@ class ContextSendMail extends Model
 
     protected $fillable = [
         'context',
+        'status'
     ];
 }

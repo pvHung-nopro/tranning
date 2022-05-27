@@ -24,5 +24,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::post('send-mail', [SendMailController::class, 'sendMail']);
 Route::get('history/{id}', [SendMailController::class, 'history']);
+Route::post('send-to-mail/{id}', [SendMailController::class, 'sendToMail']);
 
 Route::get('test', [SendMailController::class, 'test']);

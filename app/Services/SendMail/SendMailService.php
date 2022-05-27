@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\MailSale;
 use App\Models\HistorySendMail;
 use Illuminate\Support\Facades\DB;
+use App\Exceptions\Client\NotFoundException;
 use Exception;
 
 class SendMailService extends AbstractService implements SendMailServiceInterface
@@ -64,6 +65,7 @@ class SendMailService extends AbstractService implements SendMailServiceInterfac
 
     public function postMailAllUsers(Collection $users, ContextSendMail $contextSendMail): void
     {
+        $a = $contextSendMail->update(['status' => 2]);
         foreach ($users as $user) {
             try {
                 Mail::to($user->email)->send(new MailSale($user->name, $contextSendMail->context));
@@ -73,6 +75,7 @@ class SendMailService extends AbstractService implements SendMailServiceInterfac
                 $this->createHistorySendMail($user->id, $contextSendMail->id, false);
             }
         }
+        $contextSendMail->update(['status' => 3]);
     }
 
     private function createHistorySendMail(int $userId, int $contextId, bool $status): void
@@ -84,8 +87,6 @@ class SendMailService extends AbstractService implements SendMailServiceInterfac
         ]);
     }
 
-
-
     public function history(int $id): array
     {
         $numberSend = $this->historySendMail->where('context_id', $id)->count();
@@ -96,5 +97,36 @@ class SendMailService extends AbstractService implements SendMailServiceInterfac
             'mail_success' => $numberSuccess,
             'mail_faild' => $numberFaild
         ];
+    }
+
+    public function checkMailServerDie(): bool
+    {
+        $contextSendMails = $this->getRunningContextMail();
+        return $contextSendMails;
+    }
+
+    private function getRunningContextMail(): bool
+    {
+        return  $this->contextSendMail->where('status', 2)->update([
+            'status' => 4
+        ]);
+    }
+
+    private function contextSendMailDetail(int $id): ?ContextSendMail
+    {
+        $detail =  $this->contextSendMail->find($id);
+        if (!$detail) {
+            throw new NotFoundException('context_send_mail_not_found');
+        }
+        return $detail;
+    }
+
+    public function sendToMail(int $id)
+    {
+        $contextSendMail = $this->contextSendMailDetail($id);
+        if (in_array($contextSendMail->status, [1, 2])) {
+            throw new NotFoundException('context_send_mail_status_running');
+        }
+        dd('ok');
     }
 }
