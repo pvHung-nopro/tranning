@@ -65,6 +65,15 @@ services:
       - "6381:6379"
     networks:
       - mynetwork
+  #Mailhog Service
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: tranning_mailhog
+    ports:
+      - "8003:1025"
+      - "8100:8025"
+    networks:
+      - mynetwork
       
 networks:
   mynetwork:
